@@ -63,6 +63,10 @@ class Trie
     return current
   end
 
+  def all_words
+    self.autocomplete('')
+  end
+
   def autocomplete(prefix)
     last_node = find_last_node(prefix)
     if last_node.nil?
@@ -85,5 +89,22 @@ class Trie
     end
     result
   end
+
+  def all_compounds(word)
+    prefix = ''
+    prefixes = []
+    current = @root
+    word.each_char do |chr|
+      next_node = current.children[chr]
+      return prefixes if next_node.nil?
+      current = next_node
+      prefix += chr
+      prefixes << prefix if current.is_terminal?
+    end
+    return prefixes
+  end
+
+
+
 
 end

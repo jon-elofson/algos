@@ -87,10 +87,11 @@ class Trie
       next_suffixes = all_suffixes(nd)
       result += next_suffixes.map { |suff| ltr + suff }
     end
+    result << '' if node.is_terminal
     result
   end
 
-  def all_compounds(word)
+  def all_prefixes(word)
     prefix = ''
     prefixes = []
     current = @root
@@ -99,9 +100,35 @@ class Trie
       return prefixes if next_node.nil?
       current = next_node
       prefix += chr
-      prefixes << prefix if current.is_terminal?
+      prefixes << prefix if current.is_terminal && prefix != word
     end
     return prefixes
+  end
+
+  def longest_compound
+    words = all_words.sort_by { |word| -1 * word.length }
+    words.each do |word|
+      queue = []
+      prefixes = all_prefixes(word)
+      prefixes.each do |prefix|
+        suffix = word[prefix.length..-1]
+        queue << [prefix,suffix]
+      end
+      until queue.empty?
+        compounds = queue.shift
+        if compounds.all? { |comp| self.match?(comp) }
+          return word
+        else
+          suffix = compounds[1]
+          suffix_prefixes = all_prefixes(suffix)
+          suffix_prefixes.each do |pfx|
+            new_suffix = suffix[pfx.length..-1]
+            queue << [pfx,new_suffix]
+          end
+        end
+      end
+    end
+    nil
   end
 
 

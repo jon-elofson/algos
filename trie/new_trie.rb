@@ -1,3 +1,5 @@
+require 'byebug'
+
 class TrieNode
 
   attr_accessor :is_terminal, :children
@@ -13,8 +15,11 @@ end
 
 class Trie
 
-  def initialize
+  def initialize(words=[])
     @root = TrieNode.new
+    words.each do |word|
+      self.insert(word)
+    end
   end
 
 
@@ -49,10 +54,10 @@ class Trie
     current = @root
     prefix.each_char do |chr|
       next_node = current.children[chr]
-      if next_chr
+      if next_node
         current = next_node
       else
-        raise 'no word matches prefix!'
+        current = nil
       end
     end
     return current
@@ -60,24 +65,25 @@ class Trie
 
   def autocomplete(prefix)
     last_node = find_last_node(prefix)
-    suffixes = all_suffixes(node)
-    suffixes.map( |suffix| prefix + suffex)
+    if last_node.nil?
+      return []
+    else
+      suffixes = all_suffixes(last_node)
+      suffixes.map { |suffix| prefix + suffix }
+    end
   end
 
   def all_suffixes(node)
+    if node.children.empty?
+       return ['']
+    end
     result = []
     children = node.children
-    children.each do |letter,node|
-      next_suffixes = all_suffixes(node)
-      next_suffixes.each do |suff|
-        result << letter + suff
-      end
+    children.each do |ltr,nd|
+      next_suffixes = all_suffixes(nd)
+      result += next_suffixes.map { |suff| ltr + suff }
     end
     result
   end
-
-
-
-
 
 end
